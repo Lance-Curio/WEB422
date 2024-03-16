@@ -8,7 +8,7 @@
 * 
 *  Name: Lance Curio Student ID: 104319223 Date: February 2, 2024
 *
-*  Published URL: ___________________________________________________________
+*  Published URL: https://drab-cyan-giraffe-wrap.cyclic.app/
 *
 ********************************************************************************/
 const express = require('express');
@@ -34,6 +34,15 @@ db.initialize(process.env.MONGODB_CONN_STRING).then(()=>{
         console.log(err);
 });
 
+app.get('/api/listings', async (req, res) => {
+  try{
+      const listingObjs = await db.getAllListings(req.query.page, req.query.perPage, req.query.name);
+      res.status(200).json(listingObjs);
+  } catch(error) {
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 app.post('/api/listings', async (req, res) => {
     try {
         const newListing = await db.addNewListing(req.body);
@@ -44,9 +53,8 @@ app.post('/api/listings', async (req, res) => {
 });
 
 app.get('/api/listings/:id', async (req, res) => {
-    const { id } = req.params;
     try {
-      const listing = await db.getListingById(id);
+      const listing = await db.getListingById(req.params.id);
       if (!listing) {
         res.status(404).json({ message: 'Listing not found' });
       } else {
@@ -58,9 +66,8 @@ app.get('/api/listings/:id', async (req, res) => {
 });
 
 app.put('/api/listings/:id', async (req, res) => {
-    const { id } = req.params;
     try {
-      const updatedListing = await db.updateListingById(req.body, id);
+      const updatedListing = await db.updateListingById(req.body, req.params.id);
       if (!updatedListing) {
         res.status(404).json({ message: 'Listing not found' });
       } else {
@@ -72,9 +79,8 @@ app.put('/api/listings/:id', async (req, res) => {
 });
 
 app.delete('/api/listings/:id', async (req, res) => {
-    const { id } = req.params;
     try {
-      const deletedListing = await db.deleteListingById(id);
+      const deletedListing = await db.deleteListingById(req.params.id);
       if (!deletedListing) {
         res.status(404).json({ message: 'Listing not found' });
       } else {
